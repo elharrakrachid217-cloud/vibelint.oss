@@ -36,19 +36,25 @@ class TestInstallOSRouting:
     @patch("install_service._install_windows")
     @patch("install_service.platform.system", return_value="Windows")
     def test_routes_to_windows(self, _os, mock_fn):
-        install_service.main()
+        with pytest.raises(SystemExit) as exc_info:
+            install_service.main()
+        assert exc_info.value.code == 0
         mock_fn.assert_called_once()
 
     @patch("install_service._install_mac")
     @patch("install_service.platform.system", return_value="Darwin")
     def test_routes_to_mac(self, _os, mock_fn):
-        install_service.main()
+        with pytest.raises(SystemExit) as exc_info:
+            install_service.main()
+        assert exc_info.value.code == 0
         mock_fn.assert_called_once()
 
     @patch("install_service._install_linux")
     @patch("install_service.platform.system", return_value="Linux")
     def test_routes_to_linux(self, _os, mock_fn):
-        install_service.main()
+        with pytest.raises(SystemExit) as exc_info:
+            install_service.main()
+        assert exc_info.value.code == 0
         mock_fn.assert_called_once()
 
     @patch("install_service.platform.system", return_value="FreeBSD")

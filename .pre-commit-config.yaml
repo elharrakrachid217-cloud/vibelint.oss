@@ -1,0 +1,10 @@
+# Optional: use with pre-commit framework (pip install pre-commit && pre-commit install)
+# Scans staged files with VibeLint before each commit.
+repos:
+  - repo: local
+    hooks:
+      - id: vibelint
+        name: VibeLint security scan
+        entry: python vibelint/pre_commit_hook.py
+        language: system
+        pass_filenames: false

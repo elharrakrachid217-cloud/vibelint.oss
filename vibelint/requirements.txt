@@ -1,0 +1,21 @@
+# VibeLint Dependencies
+# Install with: pip install -r requirements.txt
+
+# MCP Server framework (from Anthropic)
+mcp>=1.0.0
+
+# Web framework (for future REST API / dashboard backend)
+fastapi>=0.115.0
+uvicorn>=0.30.0
+
+# Security scanning
+detect-secrets>=1.5.0   # Yelp's battle-tested secret scanner (primary secrets detector)
+semgrep>=1.60.0         # Data-flow analysis (optional — degrades gracefully if absent)
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+
+# Utilities
+python-dotenv>=1.0.0    # Load .env files in development
+packaging>=23.0         # Version parsing for dependency SCA detector

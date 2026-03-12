@@ -1,0 +1,183 @@
+rules:
+  # JavaScript/TypeScript Rules
+  - id: nosql-injection-js
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    message: |
+      Potential NoSQL injection detected. User-controlled input is passed directly to a database query method without sanitization. Use an ODM/ORM properly or validate input types (e.g. string casting) to prevent query operator injection.
+    fix: "Ensure the input is properly sanitized or casted (e.g., String(user_input)) before passing it to the query."
+    mode: taint
+    pattern-sources:
+      - patterns:
+          - pattern: req.$PROP
+          - metavariable-regex:
+              metavariable: $PROP
+              regex: ^(body|query|params)$
+      - patterns:
+          - pattern: request.$PROP
+          - metavariable-regex:
+              metavariable: $PROP
+              regex: ^(body|query|params)$
+      - pattern: req.json()
+      - pattern: request.json()
+      - patterns:
+          - pattern-inside: |
+              {..., $PROP, ...} = req
+              ...
+          - pattern: $PROP
+          - metavariable-regex:
+              metavariable: $PROP
+              regex: ^(body|query|params)$
+      - patterns:
+          - pattern-inside: |
+              {..., $PROP, ...} = request
+              ...
+          - pattern: $PROP
+          - metavariable-regex:
+              metavariable: $PROP
+              regex: ^(body|query|params)$
+    pattern-sinks:
+      - patterns:
+          - pattern: $DB.$METHOD(...)
+          - metavariable-regex:
+              metavariable: $METHOD
+              regex: ^(find|findOne|findOneAndUpdate|findOneAndDelete|findOneAndReplace|updateOne|updateMany|deleteOne|deleteMany|aggregate|insertOne|insertMany|replaceOne|countDocuments|distinct)$
+      - pattern: "{ $where: ... }"
+      - patterns:
+          - pattern-inside: '{"$regex": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$where": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$ne": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$gt": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$gte": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$lt": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$lte": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$in": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$nin": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$exists": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$not": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$elemMatch": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$or": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$and": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$nor": $VAL}'
+          - pattern: $VAL
+
+  # Python Rules
+  - id: nosql-injection-python
+    languages:
+      - python
+    severity: ERROR
+    message: |
+      Potential NoSQL injection detected. User-controlled data is passed to a database query without sanitization. If the input allows specifying NoSQL operators, it may bypass authentication or extract sensitive data. Validate and sanitize keys and values.
+    fix: "Validate the input type and structure before passing it to the database query."
+    mode: taint
+    pattern-sources:
+      - pattern: request.json
+      - pattern: request.args
+      - pattern: request.form
+      - pattern: request.get_json(...)
+      - pattern: req.json
+      - pattern: req.args
+      - pattern: req.form
+      - pattern: req.get_json(...)
+      # FastAPI Body/Query
+      - patterns:
+          - pattern-inside: |
+              def $FUNC(..., $ARG: $TYPE = Body(...), ...):
+                  ...
+          - pattern: $ARG
+      - patterns:
+          - pattern-inside: |
+              def $FUNC(..., $ARG = Body(...), ...):
+                  ...
+          - pattern: $ARG
+      - patterns:
+          - pattern-inside: |
+              def $FUNC(..., $ARG: $TYPE = Query(...), ...):
+                  ...
+          - pattern: $ARG
+      - patterns:
+          - pattern-inside: |
+              def $FUNC(..., $ARG = Query(...), ...):
+                  ...
+          - pattern: $ARG
+    pattern-sinks:
+      - patterns:
+          - pattern: $COLLECTION.$METHOD(...)
+          - metavariable-regex:
+              metavariable: $METHOD
+              regex: ^(find|find_one|find_one_and_update|find_one_and_delete|find_one_and_replace|update_one|update_many|delete_one|delete_many|aggregate|insert_one|insert_many|replace_one|count_documents|distinct)$
+      - patterns:
+          - pattern-inside: '{"$regex": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$where": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$ne": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$gt": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$gte": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$lt": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$lte": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$in": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$nin": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$exists": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$not": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$elemMatch": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$or": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$and": $VAL}'
+          - pattern: $VAL
+      - patterns:
+          - pattern-inside: '{"$nor": $VAL}'
+          - pattern: $VAL
